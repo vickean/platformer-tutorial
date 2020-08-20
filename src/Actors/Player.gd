@@ -1,11 +1,18 @@
 extends Actor
 
 var doubleJumpFlag: bool = true
+export var stomp_impulse: float = 1000.0
+
+func _on_EnemyDetector_area_entered(area: Area2D) -> void:
+	_velocity = calculate_stomp_velocity(_velocity, stomp_impulse)
+
+func _on_EnemyDetector_body_entered(body: PhysicsBody2D) -> void:
+	queue_free()
 
 # delta is provided by engine to denote time since last frame
 # _physics_process is called by engine 60 times per second
 func _physics_process(delta: float) -> void:
-	var is_jump_interrupted: bool = Input.is_action_just_released("jump") and _velocity.y <0.0
+	var is_jump_interrupted: bool = Input.is_action_just_released("jump") and _velocity.y < 0.0
 	var direction: Vector2 = get_direction()
 	_velocity = calculate_move_velocity(_velocity, direction, speed, is_jump_interrupted)
 	_velocity = move_and_slide(_velocity, FLOOR_NORMAL)
@@ -39,3 +46,10 @@ func calculate_move_velocity(
 	if is_jump_interrupted:
 		out.y = 0.0
 	return out
+
+func calculate_stomp_velocity(linear_velocity: Vector2, impulse: float) -> Vector2:
+	var out: Vector2 = linear_velocity
+	out.y = -impulse
+	return out
+
+
